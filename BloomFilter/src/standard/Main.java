@@ -18,12 +18,9 @@ public class Main {
 		int lookupListSize=(int) Math.pow(10, 5);
 		String[] lookupList=getArrayRandomString(lookupListSize);
 		
-		
-		
 		int p=10000000;
-		int k=100;
 		
-		BloomFilter bl=new BloomFilter(p,k,init);
+		BloomFilter bl=new BloomFilter(p,init);
 		System.out.println("Bloom filter 1");
 		System.out.println("FP Probability: "+bl.getProbabilityFP());
 		System.out.println();

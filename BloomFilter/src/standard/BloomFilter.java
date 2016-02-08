@@ -2,16 +2,17 @@ package standard;
 
 public class BloomFilter {
 	private byte[] set;
-	private int m;
-	private int k;
+	private long m;
+	private long k;
 	private int p;
 	private int prime1=13;
 	private int prime2=7;
 	private int n;
 	
-	public BloomFilter(int aP, int aK,String[] init){
+	public BloomFilter(int aP,String[] init){
+		n=init.length;
 		p=aP;
-		k=aK;
+		k=Math.round((double)p/(double)n* Math.log(2));
 		m=k*p;
 		set=new byte[p];
 		for(int i=0;i<init.length;i++){
@@ -26,18 +27,7 @@ public class BloomFilter {
 		for(int i=0;i<set.length;i++){
 			if(set[i]!=1)set[i]=0;
 		}
-		n=init.length;
-	}
-	
-	public BloomFilter(int aP, int aK){
-		p=aP;
-		k=aK;
-		m=k*p;
-		set=new byte[p];
-		for(int i=0;i<set.length;i++){
-			set[i]=0;
-		}
-		n=0;
+		
 	}
 	
 	private int hash( String key, int prime){ 
@@ -56,7 +46,6 @@ public class BloomFilter {
 			if( gHash < 0 ) gHash += p;
 			set[gHash]=1;
 		}
-		n++;
 	}
 	
 	public boolean lookup(String element){

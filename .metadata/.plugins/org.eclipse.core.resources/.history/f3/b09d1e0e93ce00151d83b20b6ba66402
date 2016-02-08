@@ -1,4 +1,4 @@
-package counting;
+package standard;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -18,10 +18,13 @@ public class Main {
 		int lookupListSize=(int) Math.pow(10, 5);
 		String[] lookupList=getArrayRandomString(lookupListSize);
 		
-		int p=10000000;
 		
-		CountingBloomFilter bl=new CountingBloomFilter(p,init);
-		System.out.println("Counting Bloom filter 1");
+		
+		int p=10000000;
+		int k=100;
+		
+		BloomFilter bl=new BloomFilter(p,init);
+		System.out.println("Bloom filter 1");
 		System.out.println("FP Probability: "+bl.getProbabilityFP());
 		System.out.println();
 
@@ -32,7 +35,6 @@ public class Main {
 		bl.add("benvenutoal2016ABCD");
 		System.out.println("Lookup dopo l'operazione di add \""+addString+"\": "+bl.lookup(addString));
 		System.out.println();
-		
 		// Lookup 
 		System.out.println("Lookup");
 		System.out.println("N. elementi nell'insieme del lookup: "+lookupListSize);
@@ -43,15 +45,7 @@ public class Main {
 					countFP++;
 		}
 		System.out.println("FP sul lookup degli elementi dell'ultimo array: "+countFP);
-		System.out.println();
 		
-		//Delete
-		System.out.println("Delete");
-		String deleteString="benvenutoal2016ABCD";
-		System.out.println("Lookup \""+deleteString+"\": "+bl.lookup(deleteString));
-		bl.delete("benvenutoal2016ABCD");
-		System.out.println("Lookup dopo l'operazione di delete \""+deleteString+"\": "+bl.lookup(deleteString));
-		System.out.println();
 	}
 	
 	public static String[] getArrayRandomString(int size){
