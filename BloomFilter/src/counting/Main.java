@@ -19,11 +19,14 @@ public class Main {
 		init=getArrayRandomString(initSize);
 		System.out.println("N. elementi nell'insieme iniziale: "+initSize);
 		
+		//Genero l'arrray di stringhe alfanumeriche per l'operazione di lookup
 		int lookupListSize=(int) Math.pow(10, 5);
 		String[] lookupList=getArrayRandomString(lookupListSize);
 		
+		//parametro in input per il bloom filter che identifica l'universo di ogni hash function
 		int p=10000000;
 		
+		//Inizializzazione del CountingBloomFilter
 		CountingBloomFilter bl=new CountingBloomFilter(p,init);
 		System.out.println("Counting Bloom filter 1");
 		System.out.println("FP Probability: "+bl.getProbabilityFP());
@@ -56,8 +59,17 @@ public class Main {
 		bl.delete("benvenutoal2016ABCD");
 		System.out.println("Lookup dopo l'operazione di delete \""+deleteString+"\": "+bl.lookup(deleteString));
 		System.out.println();
+		
+		/*//Print CountingBloomFilter
+		System.out.println("Bloom Filter");
+		bl.printSet();*/
 	}
 	
+	/**
+	 * method to generate an array of alphanumeric string
+	 * @param size dimension of the array
+	 * @return array of string
+	 */
 	public static String[] getArrayRandomString(int size){
 		String[] str=new String[size];
 		for (int i=0;i<size;i++){
@@ -66,7 +78,11 @@ public class Main {
 		return str;
 	}
 	
-	
+	/**
+	 * method to generate an alphanumeric string
+	 * @param size dimension of the string
+	 * @return alphanumeric string
+	 */
 	public static String getRandomString(int strSize){
 		Random r = new Random();
 	    char[] rs = new char[strSize];

@@ -1,19 +1,11 @@
 package standard;
-/**
- * 
- * @author Filippo Todeschini
- *
- */
 
 public class BloomFilter {
 	private byte[] set;
-	private long m;
-	private long k;
+	private int m;
+	private int k;
 	private int p;
-	private int prime1=13;
-	private int prime2=7;
 	private int n;
-	
 	/**
 	 * Constructor of standard bloom filter
 	 * @param aP universe of hash function
@@ -22,16 +14,13 @@ public class BloomFilter {
 	public BloomFilter(int aP,String[] init){
 		n=init.length;
 		p=aP;
-		k=Math.round((double)p/(double)n* Math.log(2));
+		k=(int)Math.round((double)p/(double)n* Math.log(2));
 		m=k*p;
-		set=new byte[p];
+		set=new byte[m];
 		for(int i=0;i<init.length;i++){
-			int hash1=hash(init[i],prime1);
-			int hash2=hash(init[i],prime2);
 			for(int j=0;j<k;j++){
-				int gHash=(hash1+ hash2 * j) % p;
-				if( gHash < 0 ) gHash += p;
-				set[gHash]=1;
+				int hash=getHashing(init[i], j);
+				set[hash]=1;
 			}
 		}
 		for(int i=0;i<set.length;i++){
@@ -40,59 +29,75 @@ public class BloomFilter {
 		
 	}
 	/**
-	 * method for hashing an element 
-	 * @param key string that it have to be hashed
-	 * @param prime prime number for hashing
-	 * @return
+	 * method to get the hash value of an element
+	 * @param element element to be hashed
+	 * @param i index of hashing function
+	 * @return hashing value
 	 */
-	private int hash( String key, int prime){ 
-		int hashVal = prime;
-		for( int i = 0; i < key.length( ); i++ ) hashVal = 31 * hashVal + key.charAt( i );
-		hashVal %= p; 
-		if( hashVal < 0 ) hashVal += p;
-		return hashVal; 
+	private int getHashing(String element, int i){
+		int hash=(hash1(element)+ hash2(element) * i) % p;
+		if( hash < 0 ) hash += p;
+		return hash;
 	}
+	/**
+	 * method for hashing function 1
+	 * @param key element to be hashed
+	 * @return value of hash function
+	 */
+	private int hash1( String key){ 
+		int val = 0;
+		for( int i = 0; i < key.length( ); i++ ) val = 31 * val + key.charAt( i );
+		return val; 
+	}
+	/**
+	 * method for hashing function 2
+	 * @param key element to be hashed
+	 * @return value of hash function
+	 */
+	private int hash2( String key){ 
+		int val = 1;
+		for( int i = 0; i < key.length( ); i++ ) val = 31 * val + key.charAt( i );
+		return val; 
+	}
+	
 	/**
 	 * method for add operation into bloom filter
 	 * @param element element to be added
 	 */
 	public void add(String element){
-		int hash1=hash(element,prime1);
-		int hash2=hash(element,prime2);
 		for(int j=0;j<k;j++){
-			int gHash=(hash1+ hash2 * j) % p;
-			if( gHash < 0 ) gHash += p;
-			set[gHash]=1;
+			int hash=getHashing(element, j);
+			set[hash]=1;
 		}
 	}
+	
 	/**
 	 * method for lookup operation
 	 * @param element element to be lookup
 	 * @return true if element is find, false otherwise
 	 */
 	public boolean lookup(String element){
-		int hash1=hash(element,prime1);
-		int hash2=hash(element,prime2);
 		for(int j=0;j<k;j++){
-			int gHash=(hash1+ hash2 * j) % p;
-			if( gHash < 0 ) gHash += p;
-			if(set[gHash]==0){
+			int hash=getHashing(element, j);
+			if(set[hash]==0){
 				return false;
 			}
 		}
 		return true;
 	}
-
+	
 	/**
 	 * method for printing the bloom filter
 	 */
 	public void printSet(){
 		System.out.print("[");
-		for(int i=0;i<set.length-1;i++)
+		for(int i=0;i<set.length-1;i++){
 			System.out.print(set[i]+", ");
+		}
 		System.out.print(set[set.length-1]+"]");
 		System.out.println();
 	}
+	
 	/**
 	 * method to get the probability of false positive
 	 * @return the probability of false positive
