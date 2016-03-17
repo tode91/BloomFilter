@@ -161,7 +161,7 @@ public class CountingBloomFilter {
 	public void delete(byte[] element){
 		if(lookup(element)==true){
 			for(int j=0;j<k;j++){
-				set[getHashing(element, j)]=set[getHashing(element, j)]-1;
+				set[getHashing(element, j)]=set[getHashing(element, j)]+1;
 			}
 			numberOfAddedElement--;
 		}
