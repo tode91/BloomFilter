@@ -1,0 +1,104 @@
+package standard;
+
+import java.util.Arrays;
+
+import data.Data;
+
+public class Main {
+	
+	public static void main(String[] args) {
+		//Genero l'arrray di stringhe alfanumeriche iniziale
+		String[] init=Data.getRandomString();
+		System.out.println("N. elementi nell'insieme iniziale: "+init.length);
+		
+		//Genero l'arrray di stringhe alfanumeriche per l'operazione di lookup
+		String[] lookupList=Data.getRandomString();
+		//parametro in input al bloom filter che indica la percentuale di fp ammissibili
+		double fp=0.001;
+		
+		//Inizializzazione del BloomFilter
+		BloomFilter bl=new BloomFilter(fp,init,init.length*2);
+		bl.getInfo();
+		//System.out.println("FP Probability: "+bl.getProbabilityFP());
+		System.out.println();
+
+		//Add
+		System.out.println("Add");
+		String addString="benvenutoal2016ABCD";
+		boolean lkS=bl.lookup(addString);
+		System.out.println("Lookup \""+addString+"\": "+lkS);
+		long addStart=System.currentTimeMillis();
+		bl.add("benvenutoal2016ABCD");
+		long addEnd=System.currentTimeMillis();
+		long lkStart=System.currentTimeMillis();
+		boolean lkE=bl.lookup(addString);
+		long lkEnd=System.currentTimeMillis();
+
+		System.out.println("Lookup dopo l'operazione di add \""+addString+"\": "+lkE);
+		
+		System.out.println("Tempo operazione add: "+addEnd+"-"+addStart+" = "+(addEnd-addStart)+" millisecond");
+		System.out.println("Tempo operazione lookup: "+lkEnd+"-"+lkStart+" = "+(lkEnd-lkStart)+" millisecond");
+
+		System.out.println();
+		
+		
+		bl.getInfo();
+		
+		// Lookup 
+		System.out.println("Lookup degli elementi di un array di pari dimensione");
+		System.out.println("N. elementi nell'insieme del lookup: "+lookupList.length);
+		int countFP=0;
+		int nTrovati=0;
+		int notTrovati=0;
+		long tStart=System.currentTimeMillis();
+		for(int i=0;i<lookupList.length;i++){
+			if(bl.lookup(lookupList[i])==true){
+				nTrovati++;
+			}else{
+				notTrovati++;
+			}
+		}
+		long tEnd=System.currentTimeMillis();
+		System.out.println("N elementi trovati sul lookup degli elementi dell'ultimo array: "+nTrovati);
+		System.out.println("Tempo operazione lookup: "+tEnd+"-"+tStart+" = "+(tEnd-tStart)+" millisecond");
+
+		System.out.println("***************************************************************");
+		System.out.println("Add di tutti gli elmenti dell'insieme del lookup precedente");
+
+		long tStartAdd=System.currentTimeMillis();
+		for(int i=0;i<lookupList.length;i++){
+			bl.add(lookupList[i]);
+		}
+		long tEndAdd=System.currentTimeMillis();
+		System.out.println("Tempo operazione add: "+tEndAdd+"-"+tStartAdd+" = "+(tEndAdd-tStartAdd)+" millisecond");
+
+		System.out.println();
+		bl.getInfo();
+		
+		// Lookup 
+		System.out.println("(2) Lookup degli elementi di un array di pari dimensione");
+		System.out.println("N. elementi nell'insieme del lookup: "+lookupList.length);
+		countFP=0;
+		nTrovati=0;
+		notTrovati=0;
+		tStart=System.currentTimeMillis();
+		for(int i=0;i<lookupList.length;i++){
+			if(bl.lookup(lookupList[i])==true){
+				nTrovati++;
+			}else{
+				notTrovati++;
+			}
+		}
+		tEnd=System.currentTimeMillis();
+		System.out.println("N elementi trovati sul lookup degli elementi dell'ultimo array: "+nTrovati);
+		System.out.println("N elementi non trovati sul lookup degli elementi dell'ultimo array: "+notTrovati);
+
+		System.out.println("Tempo operazione lookup: "+tEnd+"-"+tStart+" = "+(tEnd-tStart)+" millisecond");
+		
+	}
+	
+	
+
+}
+
+

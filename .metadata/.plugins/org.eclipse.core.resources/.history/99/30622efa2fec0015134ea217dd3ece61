@@ -1,0 +1,49 @@
+package data;
+
+import java.util.Random;
+
+public class Data {
+	
+	private static final char[] charSet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
+
+	public static String[] getRandomString(int length, int size){
+		
+		return getArrayRandomString(length,size);
+	}
+	public static String[] getRandomString(){
+		return getArrayRandomString(20,(int) Math.pow(10, 5));
+	}
+	
+	/**
+	 * method to generate an array of alphanumeric string
+	 * @param size dimension of the array
+	 * @return array of string
+	 */
+	public static String[] getArrayRandomString(int length,int size){
+		String[] str=new String[size];
+		for (int i=0;i<size;i++){
+			str[i]=getRandomString(length);
+		}
+		return str;
+	}
+	
+	/**
+	 * method to generate an alphanumeric string
+	 * @param size dimension of the string
+	 * @return alphanumeric string
+	 */
+	public static String getRandomString(int strSize){
+		Random r = new Random();
+	    char[] rs = new char[strSize];
+	    for (int i = 0; i < rs.length; i++) {
+	        int randIndexChar = r.nextInt(charSet.length);
+	        rs[i] = charSet[randIndexChar];
+	    }
+		return new String(rs);
+	}
+	
+	public static void printStat(long start, long end,int elementCount) {
+        float diff = (end - start) / 1000.0;
+        System.out.println(diff + "s, " + (elementCount / diff) + " elements/s");
+    }
+}

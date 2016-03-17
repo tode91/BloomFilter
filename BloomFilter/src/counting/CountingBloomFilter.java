@@ -1,47 +1,76 @@
 package counting;
-/**
- * 
- * @author Filippo Todeschini
- *
- */
+
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.BitSet;
+import murmurHash.MurmurHash3;
+
+
 public class CountingBloomFilter {
 	private int[] set;
-	private int m; 
-	private int k; //number of hash functions
-	private int p;  //universe of every hash function {0....p}
-	private int n; // size of the array that has to be represented in bloom filter
+	private int m;
+	private int k;
+	private int n;
+	private double fp_obj;
+	private int numberOfAddedElement=0;
+	private final int seedhash1=40;
+	private final int seedhash2=41;
+	private final Charset charset = Charset.forName("UTF-8");
+
 	
 	/**
-	 * Constructor of counting bloom filter
+	 * Constructor of standard bloom filter
 	 * @param aP universe of hash function
 	 * @param init array to be represented in bloom filter
 	 */
-	public CountingBloomFilter(int aP,String[] init){
-		n=init.length;
-		p=aP;
-		k=(int)Math.round((double)p/(double)n* Math.log(2));  // the optimal number of hash function is  k= p/n * ln(2)
-		m=k*p;
+	public CountingBloomFilter(double aFP,List init){
+		n=init.size();
+		fp_obj=aFP;
+		m=(int)Math.round(-n * Math.log(fp_obj)/Math.pow(Math.log(2), 2));
+		k=(int)Math.round((double)m/(double)n* Math.log(2));
 		set=new int[m];
-		for(int i=0;i<init.length;i++){
-			for(int j=0;j<k;j++){
-				int hash=getHashing(init[i], j);
-				set[hash]=set[hash]+1;
-			}
-		}
-		for(int i=0;i<set.length;i++){
-			if(set[i]!=1)set[i]=0;
-		}
+		this.addAll(init);
 		
 	}
+	
+	/**
+	 * Constructor of standard bloom filter
+	 * @param aP universe of hash function
+	 * @param expectedNElement number of element to be represented in bloom filter
+	 */
+	public CountingBloomFilter(double aFP,int expectedNElement){
+		n=expectedNElement;
+		fp_obj=aFP;
+		m=(int)Math.round(-n * Math.log(fp_obj)/Math.pow(Math.log(2), 2));
+		k=(int)Math.round((double)m/(double)n* Math.log(2));
+		set=new int[m];
+	}
+	
+	/**
+	 * Constructor of standard bloom filter
+	 * @param aP universe of hash function
+	 * @param init array to be represented in bloom filter
+	 * @param expectedNElement number of element to be represented in bloom filter
+
+	 */
+	public CountingBloomFilter(double aFP,List init,int expectedNElement){
+		n=expectedNElement;
+		fp_obj=aFP;
+		m=(int)Math.round(-n * Math.log(fp_obj)/Math.pow(Math.log(2), 2));
+		k=(int)Math.round((double)m/(double)n* Math.log(2));
+		set=new int[m];
+		this.addAll(init);
+	}
+	
 	/**
 	 * method to get the hash value of an element
 	 * @param element element to be hashed
 	 * @param i index of hashing function
 	 * @return hashing value
 	 */
-	private int getHashing(String element, int i){
-		int hash=(hash1(element)+ hash2(element) * i) % p;
-		if( hash < 0 ) hash += p;
+	private int getHashing(byte[] element, int i){
+		int hash=(hash1(element)+ hash2(element) * i) % m;
+		if( hash < 0 ) hash += m;
 		return hash;
 	}
 	/**
@@ -49,38 +78,53 @@ public class CountingBloomFilter {
 	 * @param key element to be hashed
 	 * @return value of hash function
 	 */
-	private int hash1( String key){ 
-		int val = 0;
-		for( int i = 0; i < key.length( ); i++ ) val = 31 * val + key.charAt( i );
-		return val; 
+	private int hash1( byte[] key){ 
+		return MurmurHash3.murmurhash3_x86_32(key, 0, key.length, seedhash1);
 	}
 	/**
 	 * method for hashing function 2
 	 * @param key element to be hashed
 	 * @return value of hash function
 	 */
-	private int hash2( String key){ 
-		int val = 1;
-		for( int i = 0; i < key.length( ); i++ ) val = 31 * val + key.charAt( i );
-		return val; 
+	private int hash2( byte[] key){ 
+		return MurmurHash3.murmurhash3_x86_32(key, 0, key.length, seedhash2);
 	}
 	
 	/**
 	 * method for add operation into bloom filter
 	 * @param element element to be added
 	 */
-	public void add(String element){
+	public void add(byte[] element){
 		for(int j=0;j<k;j++){
-			int hash=getHashing(element, j);
-			set[hash]=set[hash]+1;
+			set[getHashing(element, j)]=set[getHashing(element, j)]+1;
+		}
+		numberOfAddedElement++;
+	}
+	
+	/**
+	 * method for add operation into bloom filter
+	 * @param c element to be added
+	 */
+	public void add(String c){
+		this.add(c.getBytes(charset));
+	}
+	
+	/**
+	 * method for add operation into bloom filter
+	 * @param c list of element to be added
+	 */
+	public void addAll(List c){
+		for(Object el : c){
+			this.add(el.toString().getBytes(charset));
 		}
 	}
+	
 	/**
 	 * method for lookup operation
 	 * @param element element to be lookup
 	 * @return true if element is find, false otherwise
 	 */
-	public boolean lookup(String element){
+	public boolean lookup(byte[] element){
 		for(int j=0;j<k;j++){
 			int hash=getHashing(element, j);
 			if(set[hash]==0){
@@ -89,38 +133,126 @@ public class CountingBloomFilter {
 		}
 		return true;
 	}
-
 	/**
-	 * method for delete operation
-	 * @param element element to be deleted
+	 * method for lookup operation
+	 * @param c list of elements to be lookup
+	 * @return true if all elements of the list are find, false otherwise
 	 */
-	public void delete(String element){
-		for(int j=0;j<k;j++){
-			int hash=getHashing(element,j);
-			if(set[hash]>0) set[hash]=set[hash]-1;
+	public boolean lookupAll(List c){
+		for(Object el : c){
+			if(lookup(el.toString().getBytes(charset))==false) return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * method for lookup operation
+	 * @param c element to be lookup
+	 * @return true if element is find, false otherwise
+	 */
+	public boolean lookup(String c){
+		return this.lookup(c.getBytes(charset));
+	}
+	
+	/**
+	 * method for add operation into bloom filter
+	 * @param element element to be added
+	 */
+	public void delete(byte[] element){
+		if(lookup(element)==true){
+			for(int j=0;j<k;j++){
+				set[getHashing(element, j)]=set[getHashing(element, j)]+1;
+			}
+			numberOfAddedElement--;
 		}
 	}
 	
 	/**
-	 * method for printing the bloom filter
+	 * method for add operation into bloom filter
+	 * @param c element to be added
 	 */
-	public void printSet(){
-		System.out.print("[");
-		for(int i=0;i<set.length-1;i++){
-			System.out.print(set[i]+", ");
-		}
-		System.out.print(set[set.length-1]+"]");
-		System.out.println();
+	public void delete(String c){
+		this.delete(c.getBytes(charset));
 	}
 	
 	/**
-	 * method to get the probability of false positive
+	 * method for add operation into bloom filter
+	 * @param c list of element to be added
+	 */
+	public void deleteAll(List c){
+		for(Object el : c){
+			this.delete(el.toString().getBytes(charset));
+		}
+	}
+	
+	/**
+	 * method to get expected the probability of false positive
 	 * @return the probability of false positive
 	 */
 	public double getProbabilityFP(){
-		double fpProb=1-Math.pow(1-Math.pow((double)k/(double)m,2),(double)n);
+		double fpProb=Math.pow(1-Math.pow((1-(double)1/(double)m),k*n),k);
+		return fpProb;
+	}
+	/**
+	 * method to get current the probability of false positive: depends on how many elements are added into bloom filter
+	 * @return the probability of false positive
+	 */
+	public double getProbabilityFPReal(){
+		double fpProb=Math.pow(1-Math.pow((1-(double)1/(double)m),k*this.numberOfAddedElement),k);
 		return fpProb;
 	}
 	
+	/**
+	 * method to get the number of elements represented into bloom filter
+	 * @return number of elements
+	 */
+	public int getNumberOfAddedElement(){
+		return this.numberOfAddedElement;
+	}
+	
+	/**
+	 * method to clear bloom filter
+	 */
+	public void clearBloomFilter(){
+		this.set=new int[m];
+		this.numberOfAddedElement=0;
+	}
+	
+	/**
+	 * method to check if bloom filter is full: the number of elements represented is > or = to the expected number of elements
+	 * @return true if is full, false otherwise
+	 */
+	public boolean isFull(){
+		if(numberOfAddedElement>=n){return true;}
+		else{return false;}
+	}
 
+	/**
+	 * method to print some information about the current bloom filter
+	 */
+	public void getInfo(){
+		
+		System.out.println("***************************************************************");
+		System.out.println("Number of expected element (N) ->"+this.n);
+		System.out.println("Number of elements represented ->"+this.numberOfAddedElement);
+		System.out.println("Bloom Filter is Full? ->"+this.isFull());
+
+		System.out.println("Size of bloom filter (M) ->"+this.m);
+		System.out.println("Number of hash functions (K) ->"+this.k);
+		System.out.println("False Positive probability objective ->"+this.fp_obj);
+		System.out.println("False Positive probability expected ->"+this.getProbabilityFP());
+		System.out.println("False Positive probability real ->"+this.getProbabilityFPReal());
+
+		
+		int count0=0;
+		int count1=0;
+		for(int i=0; i<set.length;i++){
+			if(set[i]==0)count0++;
+			else count1++;
+		}
+		System.out.println("Number of 0 ->"+count0);
+		System.out.println("Number of 1 ->"+count1);
+		System.out.println("***************************************************************");
+	
+	}
 }

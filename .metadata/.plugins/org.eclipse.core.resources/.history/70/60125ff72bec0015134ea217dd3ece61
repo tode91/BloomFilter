@@ -1,0 +1,69 @@
+package standard;
+
+import data.Data;
+
+public class Main {
+	
+	public static void main(String[] args) {
+		//Genero l'arrray di stringhe alfanumeriche iniziale
+		String[] init=Data.getRandomString();
+		System.out.println("N. elementi nell'insieme iniziale: "+init.length);
+		
+		//Genero l'arrray di stringhe alfanumeriche per l'operazione di lookup
+		String[] lookupList=Data.getRandomString();
+		
+		//parametro in input al bloom filter che indica la percentuale di fp ammissibili
+		double fp=0.001;
+		
+		//Inizializzazione del BloomFilter
+		BloomFilter bl=new BloomFilter(fp,init,init.length*2);
+		bl.getInfo();
+		//System.out.println("FP Probability: "+bl.getProbabilityFP());
+		System.out.println();
+
+		//Add
+		System.out.println("Add");
+		String addString="benvenutoal2016ABCD";
+		boolean lkS=bl.lookup(addString);
+		System.out.println("Lookup \""+addString+"\": "+lkS);
+		long addStart=System.currentTimeMillis();
+		bl.add("benvenutoal2016ABCD");
+		long addEnd=System.currentTimeMillis();
+		long lkStart=System.currentTimeMillis();
+		boolean lkE=bl.lookup(addString);
+		long lkEnd=System.currentTimeMillis();
+
+		System.out.println("Lookup dopo l'operazione di add \""+addString+"\": "+lkE);
+		
+		System.out.println("Tempo operazione add: "+addEnd+"-"+addStart+"="+(addEnd-addStart)+" millisecond");
+		System.out.println("Tempo operazione lookup: "+lkEnd+"-"+lkStart+"="+(lkEnd-lkStart)+" millisecond");
+
+		System.out.println();
+		
+		
+		bl.getInfo();
+		
+		// Lookup 
+/*		System.out.println("Lookup");
+		System.out.println("N. elementi nell'insieme del lookup: "+lookupList.length);
+		int countFP=0;
+		for(int i=0;i<lookupList.length;i++){
+			if(bl.lookup(lookupList[i])==true)
+				if(Arrays.asList(init).contains(lookupList[i])==false)
+					countFP++;
+		}
+		System.out.println("FP sul lookup degli elementi dell'ultimo array: "+countFP);
+		System.out.println();
+		System.out.println("Percentuale FP: "+((double)countFP/(double)lookupList.length));*/
+
+		/*//Print BloomFilter
+		System.out.println("Bloom Filter");
+		bl.printSet();*/
+		
+	}
+	
+	
+
+}
+
+

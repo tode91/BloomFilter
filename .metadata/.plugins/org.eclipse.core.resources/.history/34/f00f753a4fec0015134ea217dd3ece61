@@ -1,0 +1,57 @@
+package data;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.lang.instrument.Instrumentation;
+
+public class Data {
+	
+	private static final char[] charSet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
+
+	public static List<String> getRandomString(int length, int size){
+		
+		return getArrayRandomString(length,size);
+	}
+	public static List<String> getRandomString(){
+		return getArrayRandomString(20,(int) Math.pow(10, 5));
+	}
+	
+	/**
+	 * method to generate an array of alphanumeric string
+	 * @param size dimension of the array
+	 * @return array of string
+	 */
+	public static List<String> getArrayRandomString(int length,int size){
+		ArrayList<String> str=new ArrayList<String>();
+		for (int i=0;i<size;i++){
+			str.add(i, getRandomString(length));
+		}
+		return str;
+	}
+	
+	/**
+	 * method to generate an alphanumeric string
+	 * @param size dimension of the string
+	 * @return alphanumeric string
+	 */
+	public static String getRandomString(int strSize){
+		Random r = new Random();
+	    char[] rs = new char[strSize];
+	    for (int i = 0; i < rs.length; i++) {
+	        int randIndexChar = r.nextInt(charSet.length);
+	        rs[i] = charSet[randIndexChar];
+	    }
+		return new String(rs);
+	}
+	
+	public static void printStat(String name,long start, long end,int elementCount) {
+        double diff = (end - start) / 1000.0000;
+        System.out.println(name+", "+elementCount+" element: "+diff + "s, " + (elementCount / diff) + " elements/s");
+    }
+	
+	public static getObjectSize(Object o){
+	        return new Instrumentation().getObjectSize(o);
+	    }	
+}

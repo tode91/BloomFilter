@@ -1,0 +1,172 @@
+package standard;
+
+
+import java.util.BitSet;
+
+import murmurHash.MurmurHash;
+import murmurHash.MurmurHash3;
+
+
+public class BloomFilter {
+	private BitSet set;
+	private int m;
+	private int k;
+	private int n;
+	private double fp_obj;
+	private int numberOfAddedElement=0;
+	
+	
+	/**
+	 * Constructor of standard bloom filter
+	 * @param aP universe of hash function
+	 * @param init array to be represented in bloom filter
+	 */
+	public BloomFilter(double aFP,String[] init){
+		n=init.length;
+		fp_obj=aFP;
+		m=(int)Math.round(-n * Math.log(fp_obj)/Math.pow(Math.log(2), 2));
+		k=(int)Math.round((double)m/(double)n* Math.log(2));
+		set=new BitSet(m);
+		for(int i=0;i<init.length;i++){
+			add(init[i]);
+		}
+		getInfo();
+	}
+	
+	/**
+	 * Constructor of standard bloom filter
+	 * @param aP universe of hash function
+	 * @param expectedNElement number of element to be represented in bloom filter
+	 */
+	public BloomFilter(double aFP,int expectedNElement){
+		n=expectedNElement;
+		fp_obj=aFP;
+		m=(int)Math.round(-n * Math.log(fp_obj)/Math.pow(Math.log(2), 2));
+		k=(int)Math.round((double)m/(double)n* Math.log(2));
+		set=new BitSet(m);
+		getInfo();
+	}
+	
+	/**
+	 * Constructor of standard bloom filter
+	 * @param aP universe of hash function
+	 * @param init array to be represented in bloom filter
+	 * @param expectedNElement number of element to be represented in bloom filter
+
+	 */
+	public BloomFilter(double aFP,String[] init,int expectedNElement){
+		n=expectedNElement;
+		fp_obj=aFP;
+		m=(int)Math.round(-n * Math.log(fp_obj)/Math.pow(Math.log(2), 2));
+		k=(int)Math.round((double)m/(double)n* Math.log(2));
+		set=new BitSet(m);
+		for(int i=0;i<init.length;i++){
+			add(init[i]);
+		}
+		getInfo();
+	}
+	
+	/**
+	 * method to get the hash value of an element
+	 * @param element element to be hashed
+	 * @param i index of hashing function
+	 * @return hashing value
+	 */
+	private int getHashing(String element, int i){
+		int hash=(hash1(element)+ hash2(element) * i) % m;
+		if( hash < 0 ) hash += m;
+		return hash;
+	}
+	/**
+	 * method for hashing function 1
+	 * @param key element to be hashed
+	 * @return value of hash function
+	 */
+	private int hash1( String key){ 
+		//return MurmurHash.hash(key.getBytes(), 0);
+		return MurmurHash3.murmurhash3_x86_32(key.getBytes(), 0, key.getBytes().length, 0);
+	}
+	/**
+	 * method for hashing function 2
+	 * @param key element to be hashed
+	 * @return value of hash function
+	 */
+	private int hash2( String key){ 
+		//return MurmurHash.hash(key.getBytes(), 1);
+		return MurmurHash3.murmurhash3_x86_32(key.getBytes(), 0, key.getBytes().length, 1);
+	}
+	
+	/**
+	 * method for add operation into bloom filter
+	 * @param element element to be added
+	 */
+	public void add(String element){
+		for(int j=0;j<k;j++){
+			int hash=getHashing(element, j);
+			set.set(hash, true);
+		}
+	}
+	
+	/**
+	 * method for lookup operation
+	 * @param element element to be lookup
+	 * @return true if element is find, false otherwise
+	 */
+	public boolean lookup(String element){
+		for(int j=0;j<k;j++){
+			int hash=getHashing(element, j);
+			if(set.get(hash)==false){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * method for printing the bloom filter
+	 */
+	public void printSet(){
+		System.out.print("[");
+		for(int i=0;i<set.size()-1;i++){
+			System.out.print(set.get(i)+", ");
+		}
+		System.out.print(set.get(set.size()-1)+"]");
+		System.out.println();
+	}
+	
+	/**
+	 * method to get the probability of false positive
+	 * @return the probability of false positive
+	 */
+	public double getProbabilityFP(){
+		double fpProb=Math.pow(1-Math.pow((1-(double)1/(double)m),k*n),k);
+		return fpProb;
+	}
+	
+	
+	public int getNumberOfAddedElement(){
+		return this.numberOfAddedElement;
+	}
+	
+	public void clearBloomFilter(){
+		this.set.clear();
+		this.numberOfAddedElement=0;
+	}
+	
+
+	public void getInfo(){
+		System.out.println("N ->"+this.n);
+		System.out.println("M ->"+this.m);
+		System.out.println("K ->"+this.k);
+		System.out.println("FP Obj ->"+this.fp_obj);
+		int count0=0;
+		int count1=0;
+		for(int i=0; i<set.size();i++){
+			if(set.get(i)==false)count0++;
+			else count1++;
+		}
+		System.out.println("Number of 0 ->"+count0);
+		System.out.println("Number of 1 ->"+count1);
+		
+	}
+}

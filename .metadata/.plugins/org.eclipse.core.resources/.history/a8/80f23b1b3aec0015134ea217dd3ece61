@@ -1,0 +1,137 @@
+package standard;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import data.Data;
+
+public class Main {
+	
+	public static void main(String[] args) {
+		//Genero l'arrray di stringhe alfanumeriche iniziale
+		List<String> init=Data.getRandomString(20,50000);
+		
+		//Genero l'arrray di stringhe alfanumeriche per l'operazione di lookup
+		List<String> lookupList=Data.getRandomString(20,50000);
+		
+		//Inizializzazione del BloomFilter
+		//parametro in input al bloom filter che indica la percentuale di fp ammissibili
+		double fp=0.001;
+	//	BloomFilter bl=new BloomFilter(fp,init,init.size());
+		BloomFilter bl=new BloomFilter(fp,init.size()*2);
+		bl.getInfo();
+		System.out.println("Costo operazioni svolte");
+
+
+		//Add
+	/*	System.out.println("Add");
+		String addString="benvenutoal2016ABCD";
+		boolean lkS=bl.lookup(addString);
+		System.out.println("Lookup \""+addString+"\": "+lkS);
+		long addStart=System.currentTimeMillis();
+		bl.add("benvenutoal2016ABCD");
+		long addEnd=System.currentTimeMillis();
+		long lkStart=System.currentTimeMillis();
+		boolean lkE=bl.lookup(addString);
+		long lkEnd=System.currentTimeMillis();
+
+		System.out.println("Lookup dopo l'operazione di add \""+addString+"\": "+lkE);
+		
+		
+		Data.printStat("add()",addStart, addEnd, 1);
+		Data.printStat("lookup()",lkStart, lkEnd, 1);
+
+
+		System.out.println();
+		
+		
+		bl.getInfo();
+		
+		// Lookup 
+		System.out.println("Lookup degli elementi di un array di pari dimensione");
+		System.out.println("N. elementi nell'insieme del lookup: "+lookupList.length);
+		int nTrovati=0;
+		int notTrovati=0;
+		long tStart=System.currentTimeMillis();
+		for(int i=0;i<lookupList.length;i++){
+			if(bl.lookup(lookupList[i])==true){
+				nTrovati++;
+			}else{
+				notTrovati++;
+			}
+		}
+		long tEnd=System.currentTimeMillis();
+		System.out.println("N elementi trovati sul lookup degli elementi dell'ultimo array: "+nTrovati);
+		Data.printStat("lookup()",tStart, tEnd, lookupList.length);
+
+		System.out.println("***************************************************************");
+		
+		*/
+		
+		
+		//Add di tutti gli elementi dell'insieme iniziale
+
+		long tStartAdd=System.currentTimeMillis();
+		for(Object l: init){
+			bl.add(l.toString());
+		}
+		long tEndAdd=System.currentTimeMillis();
+		Data.printStat("add()",tStartAdd, tEndAdd, lookupList.size());
+		
+		// Lookup degli elementi di un array di pari dimensione
+		//System.out.println("N. elementi nell'insieme del lookup: "+lookupList.size());
+		int nTrovati=0;
+		int notTrovati=0;
+		long tStart=System.currentTimeMillis();
+		for(Object l : lookupList){
+			bl.lookup(l.toString());
+		/*
+			if(bl.lookup(l.toString())==true){
+				nTrovati++;
+			}else{
+				notTrovati++;
+			}*/
+		}
+		long tEnd=System.currentTimeMillis();
+		//System.out.println("N elementi trovati sul lookup degli elementi dell'ultimo array: "+nTrovati);
+		//System.out.println("N elementi non trovati sul lookup degli elementi dell'ultimo array: "+notTrovati);
+		
+		Data.printStat("lookup()",tStart, tEnd, lookupList.size());
+		tStart=System.currentTimeMillis();
+		boolean b=bl.lookupAll(lookupList);
+		tEnd=System.currentTimeMillis();
+		Data.printStat("lookupAll()",tStart, tEnd, lookupList.size());
+		
+		//Add di tutti gli elementi dell'insieme del lookup precedente
+		System.out.println("Costo operazioni svolte aggiungendo l'array di lookup al bloom filter");
+		
+		tStartAdd=System.currentTimeMillis();
+		for(Object l: lookupList){
+			bl.add(l.toString());
+		}
+		tEndAdd=System.currentTimeMillis();
+		Data.printStat("add()",tStartAdd, tEndAdd, lookupList.size());
+		
+		// Lookup degli elementi di un array di pari dimensione
+		//System.out.println("N. elementi nell'insieme del lookup: "+lookupList.size());
+		
+		tStart=System.currentTimeMillis();
+		for(Object l : lookupList){
+			bl.lookup(l.toString());
+		}
+		tEnd=System.currentTimeMillis();
+		
+		Data.printStat("lookup()",tStart, tEnd, lookupList.size());
+		tStart=System.currentTimeMillis();
+		b=bl.lookupAll(lookupList);
+		tEnd=System.currentTimeMillis();
+		Data.printStat("lookupAll()",tStart, tEnd, lookupList.size());
+
+		bl.getInfo();
+
+	}
+
+}
+
+
